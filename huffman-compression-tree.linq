@@ -173,6 +173,6 @@ public static class ConsoleFormatter
 	
 	public static string BuildOutput(string text, int count, int indentLevel)
 	{
-		return $"{BuildIndent(indentLevel)}{text}: {count}";
+		return $"{BuildIndent(indentLevel)}'{text}': {count}";
 	}
 }
