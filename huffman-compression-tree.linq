@@ -1,7 +1,7 @@
 <Query Kind="Program" />
 
 void Main()
-{
+{	
 	var freq = GetFrequenciesFromText("A_DEAD_DAD_CEDED_A_BAD_BABE_A_BEADED_ABACA_BED");
 
 	var nodeList = freq
@@ -12,13 +12,36 @@ void Main()
 	var tree = RunSort(nodeList);
 	
 	var rootNode = new SumNode(tree[0].Value, tree[1].Value);
+	Print(rootNode);
+}
+
+void Print(INode node, int indentLevel = 0)
+{
+	var indent = "";
+	for (var i = 0; i < indentLevel; i++)
+	{
+		indent += "\t\t";
+	}
+	indent += "";
 	
-	rootNode.Dump();
+	if (node is LeafNode)
+	{
+		var leafNode = (LeafNode)node;
+		Console.WriteLine($"{indent}{leafNode.Char}: {leafNode.Frequency}");
+		return;
+	}
+	else if (node is SumNode)
+	{
+		var sumNode = (SumNode)node;
+		Console.WriteLine($"{indent}{sumNode.Label}: {sumNode.Sum}");
+		Print(sumNode.LeftChild, indentLevel + 1);
+		Print(sumNode.RightChild, indentLevel + 1);
+	}
 }
 
 List<KeyValuePair<int, INode>> RunSort(List<KeyValuePair<int, INode>> nodeList)
 {
-	//remove top two items from the ordered list
+	//capture then remove the top two items from the ordered list
 	var first = nodeList[0];
 	var second = nodeList[1];
 	
