@@ -2,7 +2,9 @@
 
 void Main()
 {	
-	var freq = GetFrequenciesFromText("A_DEAD_DAD_CEDED_A_BAD_BABE_A_BEADED_ABACA_BED");
+	var input = "A_DEAD_DAD_CEDED_A_BAD_BABE_A_BEADED_ABACA_BED";
+	
+	var freq = GetFrequenciesFromText(input);
 
 	var nodeList = freq
 		.OrderBy(x => x.Value)
