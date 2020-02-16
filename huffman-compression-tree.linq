@@ -11,12 +11,12 @@ void Main()
 		.Select(x => new KeyValuePair<int, INode>(x.Value, new LeafNode(x.Key, x.Value)))
 		.ToList();
 	
-	var rootNode = RunSort(nodeList);
+	var rootNode = BuildTree(nodeList);
 	
 	rootNode.Print();
 }
 
-RootNode RunSort(List<KeyValuePair<int, INode>> nodeList)
+RootNode BuildTree(List<KeyValuePair<int, INode>> nodeList)
 {
 	//capture then remove the top two items from the ordered list
 	var first = nodeList[0];
@@ -34,7 +34,7 @@ RootNode RunSort(List<KeyValuePair<int, INode>> nodeList)
 	//re-sort nodeList
 	if (nodeList.Count > 2 )
 	{
-		return RunSort(nodeList.OrderBy(x => x.Key).ToList());
+		return BuildTree(nodeList.OrderBy(x => x.Key).ToList());
 	}
 	else
 	{
@@ -135,33 +135,44 @@ public static class NodeExtensions
 	}
 	
 	public static void Print(this INode node, int indentLevel = 0)
-	{
-		var indent = "";
-		for (var i = 0; i < indentLevel; i++)
-		{
-			indent += "\t\t";
-		}
-		indent += "";
-		
+	{		
 		if (node is LeafNode)
 		{
 			var leafNode = (LeafNode)node;
-			Console.WriteLine($"{indent}{leafNode.Char}: {leafNode.Frequency}");
+			Console.WriteLine(ConsoleFormatter.BuildOutput(leafNode.Char.ToString(), leafNode.Frequency, indentLevel));
 			return;
 		}
 		else if (node is SumNode)
 		{
 			var sumNode = (SumNode)node;
-			Console.WriteLine($"{indent}{sumNode.Label}: {sumNode.Sum}");
+			Console.WriteLine(ConsoleFormatter.BuildOutput(sumNode.Label, sumNode.Sum, indentLevel));
 			Print(sumNode.LeftChild, indentLevel + 1);
 			Print(sumNode.RightChild, indentLevel + 1);
 		}
 		else if (node is RootNode)
 		{
 			var rootNode = (RootNode)node;
-			Console.WriteLine($"{indent}{rootNode.Label}: {rootNode.Sum}");
+			Console.WriteLine(ConsoleFormatter.BuildOutput(rootNode.Label, rootNode.Sum, indentLevel));
 			Print(rootNode.LeftChild, indentLevel + 1);
 			Print(rootNode.RightChild, indentLevel + 1);
 		}
+	}
+}
+
+public static class ConsoleFormatter
+{
+	private static string BuildIndent(int indentLevel)
+	{
+		var indent = "";
+		for (var i = 0; i < indentLevel; i++)
+		{
+			indent += "\t\t";
+		}
+		return indent;
+	}
+	
+	public static string BuildOutput(string text, int count, int indentLevel)
+	{
+		return $"{BuildIndent(indentLevel)}{text}: {count}";
 	}
 }
