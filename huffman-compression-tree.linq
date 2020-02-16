@@ -11,37 +11,12 @@ void Main()
 		.Select(x => new KeyValuePair<int, INode>(x.Value, new LeafNode(x.Key, x.Value)))
 		.ToList();
 	
-	var tree = RunSort(nodeList);
+	var rootNode = RunSort(nodeList);
 	
-	var rootNode = new SumNode(tree[0].Value, tree[1].Value);
-	Print(rootNode);
+	rootNode.Print();
 }
 
-void Print(INode node, int indentLevel = 0)
-{
-	var indent = "";
-	for (var i = 0; i < indentLevel; i++)
-	{
-		indent += "\t\t";
-	}
-	indent += "";
-	
-	if (node is LeafNode)
-	{
-		var leafNode = (LeafNode)node;
-		Console.WriteLine($"{indent}{leafNode.Char}: {leafNode.Frequency}");
-		return;
-	}
-	else if (node is SumNode)
-	{
-		var sumNode = (SumNode)node;
-		Console.WriteLine($"{indent}{sumNode.Label}: {sumNode.Sum}");
-		Print(sumNode.LeftChild, indentLevel + 1);
-		Print(sumNode.RightChild, indentLevel + 1);
-	}
-}
-
-List<KeyValuePair<int, INode>> RunSort(List<KeyValuePair<int, INode>> nodeList)
+RootNode RunSort(List<KeyValuePair<int, INode>> nodeList)
 {
 	//capture then remove the top two items from the ordered list
 	var first = nodeList[0];
@@ -57,9 +32,15 @@ List<KeyValuePair<int, INode>> RunSort(List<KeyValuePair<int, INode>> nodeList)
 	nodeList.Add(new KeyValuePair<int, INode>(sumNode.Sum, sumNode));
 	
 	//re-sort nodeList
-	return nodeList.Count > 2 
-		? RunSort(nodeList.OrderBy(x => x.Key).ToList()) 
-		: nodeList.OrderBy(x => x.Key).ToList();
+	if (nodeList.Count > 2 )
+	{
+		return RunSort(nodeList.OrderBy(x => x.Key).ToList());
+	}
+	else
+	{
+		var list = nodeList.OrderBy(x => x.Key).ToList();
+		return new RootNode(list[0].Value, list[1].Value);
+	}
 }
 
 List<KeyValuePair<char, int>> GetFrequenciesFromText(string input)
@@ -80,6 +61,12 @@ List<KeyValuePair<char, int>> GetFrequenciesFromText(string input)
 	return values
 		.Select(x => new KeyValuePair<char, int>(x.Key, x.Value))
 		.ToList();
+}
+
+public class RootNode : SumNode, INode
+{
+	public RootNode(INode leftChild, INode rightChild): base(leftChild, rightChild)
+	{}
 }
 
 public class SumNode : INode
@@ -145,5 +132,36 @@ public static class NodeExtensions
 	public static int GetSum(this INode node)
 	{
 		return node is LeafNode ? ((LeafNode)node).Frequency : ((SumNode)node).Sum;
+	}
+	
+	public static void Print(this INode node, int indentLevel = 0)
+	{
+		var indent = "";
+		for (var i = 0; i < indentLevel; i++)
+		{
+			indent += "\t\t";
+		}
+		indent += "";
+		
+		if (node is LeafNode)
+		{
+			var leafNode = (LeafNode)node;
+			Console.WriteLine($"{indent}{leafNode.Char}: {leafNode.Frequency}");
+			return;
+		}
+		else if (node is SumNode)
+		{
+			var sumNode = (SumNode)node;
+			Console.WriteLine($"{indent}{sumNode.Label}: {sumNode.Sum}");
+			Print(sumNode.LeftChild, indentLevel + 1);
+			Print(sumNode.RightChild, indentLevel + 1);
+		}
+		else if (node is RootNode)
+		{
+			var rootNode = (RootNode)node;
+			Console.WriteLine($"{indent}{rootNode.Label}: {rootNode.Sum}");
+			Print(rootNode.LeftChild, indentLevel + 1);
+			Print(rootNode.RightChild, indentLevel + 1);
+		}
 	}
 }
