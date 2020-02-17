@@ -4,16 +4,29 @@ void Main()
 {	
 	var input = "A_DEAD_DAD_CEDED_A_BAD_BABE_A_BEADED_ABACA_BED";
 	
-	var freq = GetFrequenciesFromText(input);
+	//get the count of each character in the input string
+	var counts = GetCharacterCountsFromText(input);
 
-	var nodeList = freq
+	//sort the count list ascending
+	var nodeList = counts
 		.OrderBy(x => x.Value)
 		.Select(x => new KeyValuePair<int, INode>(x.Value, new LeafNode(x.Key, x.Value)))
 		.ToList();
 	
+	//build the tree and return the root node
 	var rootNode = BuildTree(nodeList);
 	
+	//print the tree to the Console
 	rootNode.Print();
+	
+	//calculate the binary value of each distinct character using the tree
+	Dictionary<char, string> binaryValues = input
+		.ToCharArray()
+		.Distinct()
+		.ToDictionary(x => x, x => rootNode.GetBinary(x));
+	
+	//print the binary values to the Console
+	Console.WriteLine(binaryValues);
 }
 
 RootNode BuildTree(List<KeyValuePair<int, INode>> nodeList)
@@ -43,7 +56,7 @@ RootNode BuildTree(List<KeyValuePair<int, INode>> nodeList)
 	}
 }
 
-List<KeyValuePair<char, int>> GetFrequenciesFromText(string input)
+List<KeyValuePair<char, int>> GetCharacterCountsFromText(string input)
 {
 	var values = new Dictionary<char, int>();
 	foreach (char c in input)
@@ -156,6 +169,30 @@ public static class NodeExtensions
 			Print(rootNode.LeftChild, indentLevel + 1);
 			Print(rootNode.RightChild, indentLevel + 1);
 		}
+	}
+	
+	public static string GetBinary(this INode node, char c, string binaryResult = "")
+	{		
+		if (node is LeafNode)
+		{
+			var leafNode = (LeafNode)node;
+			return binaryResult;
+		}
+		else if (node is SumNode)
+		{
+			var sumNode = (SumNode)node;
+			return sumNode.LeftChild.GetLabel().Contains(c)
+				? GetBinary(sumNode.LeftChild, c, $"{binaryResult}0")
+				: GetBinary(sumNode.RightChild, c, $"{binaryResult}1");
+		}
+		else if (node is RootNode)
+		{
+			var rootNode = (RootNode)node;
+			return rootNode.LeftChild.GetLabel().Contains(c)
+				? GetBinary(rootNode.LeftChild, c, $"{binaryResult}0")
+				: GetBinary(rootNode.RightChild, c, $"{binaryResult}1");
+		}
+		throw new Exception("Unsupported node type");
 	}
 }
 
