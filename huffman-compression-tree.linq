@@ -27,6 +27,20 @@ void Main()
 	
 	//print the binary values to the Console
 	Console.WriteLine(binaryValues);
+	
+	//use the tree and binary values to compress the input text
+	var compressed = string.Join("", 
+		input
+			.ToCharArray()
+			.Select(x => binaryValues[x])
+			.ToList()
+		);
+	Console.WriteLine(compressed);
+	
+	//calculate the compression rate based on length
+	int inputLengthInBits = (input.Length*8);
+	decimal compressionRate = ((decimal)compressed.Length / (decimal)inputLengthInBits) * 100;	
+	Console.WriteLine($"Compression rate: {Math.Round(compressionRate, 2)}%");
 }
 
 RootNode BuildTree(List<KeyValuePair<int, INode>> nodeList)
