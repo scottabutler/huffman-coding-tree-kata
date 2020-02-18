@@ -3,6 +3,8 @@
 void Main()
 {	
 	var input = "A_DEAD_DAD_CEDED_A_BAD_BABE_A_BEADED_ABACA_BED";
+	Console.WriteLine($"Input text: {input}");
+	Console.WriteLine();
 	
 	//get the count of each character in the input string
 	var counts = GetCharacterCountsFromText(input);
@@ -18,6 +20,7 @@ void Main()
 	
 	//print the tree to the Console
 	rootNode.Print();
+	Console.WriteLine();
 	
 	//calculate the binary value of each distinct character using the tree
 	Dictionary<char, string> binaryValues = input
@@ -27,6 +30,7 @@ void Main()
 	
 	//print the binary values to the Console
 	Console.WriteLine(binaryValues);
+	Console.WriteLine();
 	
 	//use the tree and binary values to compress the input text
 	var compressed = string.Join("", 
@@ -34,13 +38,53 @@ void Main()
 			.ToCharArray()
 			.Select(x => binaryValues[x])
 			.ToList()
-		);
-	Console.WriteLine(compressed);
+		);	
+	Console.WriteLine($"Compressed value: {compressed}");
 	
 	//calculate the compression rate based on length
 	int inputLengthInBits = (input.Length*8);
 	decimal compressionRate = ((decimal)compressed.Length / (decimal)inputLengthInBits) * 100;	
+	
+	//decompress the text again
+	var decompressed = string.Empty;
+	while (compressed.Length > 0)
+	{
+		var @char = Search(rootNode, compressed);
+		decompressed += @char;
+		
+		var binaryValue = binaryValues[@char];
+		compressed = compressed.Substring(binaryValue.Length);
+	}	
+	
+	Console.WriteLine($"Decompressed value: {decompressed}");	
 	Console.WriteLine($"Compression rate: {Math.Round(compressionRate, 2)}%");
+}
+
+char Search(INode node, string compressed)
+{
+	if (node is LeafNode)
+	{
+		return ((LeafNode)node).Char;
+	}
+	else if (node is SumNode)
+	{
+		return Search(
+			compressed[0] == '0'
+				? ((SumNode)node).LeftChild
+				: ((SumNode)node).RightChild,
+			compressed.Substring(1)
+		);
+	}
+	else if (node is RootNode)
+	{
+		return Search(
+			compressed[0] == '0'
+				? ((RootNode)node).LeftChild
+				: ((RootNode)node).RightChild,
+			compressed.Substring(1)
+		);
+	}
+	throw new Exception("Unhandled node type in Search");
 }
 
 RootNode BuildTree(List<KeyValuePair<int, INode>> nodeList)
