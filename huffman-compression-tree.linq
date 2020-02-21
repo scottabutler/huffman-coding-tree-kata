@@ -47,44 +47,28 @@ void Main()
 	
 	//decompress the text again
 	var decompressed = string.Empty;
+	var reverseBinaryValues = binaryValues.ToDictionary(x => x.Value, x => x.Key);
+	var searchString = compressed[0].ToString();
 	while (compressed.Length > 0)
 	{
-		var @char = Search(rootNode, compressed);
-		decompressed += @char;
-		
-		var binaryValue = binaryValues[@char];
-		compressed = compressed.Substring(binaryValue.Length);
-	}	
+		if (reverseBinaryValues.ContainsKey(searchString))
+		{
+			decompressed += reverseBinaryValues[searchString]; //Append the char to the decompressed string
+			compressed = compressed.Substring(searchString.Length); //Trim the binary value off the start
+			
+			if (compressed.Length == 0)
+				break;
+			
+			searchString = compressed[0].ToString(); //Reset working string to the new first character
+		}
+		else
+		{
+			searchString = compressed.Substring(0, searchString.Length + 1);
+		}
+	}
 	
 	Console.WriteLine($"Decompressed value: {decompressed}");	
 	Console.WriteLine($"Compression rate: {Math.Round(compressionRate, 2)}%");
-}
-
-char Search(INode node, string compressed)
-{
-	if (node is LeafNode)
-	{
-		return ((LeafNode)node).Char;
-	}
-	else if (node is SumNode)
-	{
-		return Search(
-			compressed[0] == '0'
-				? ((SumNode)node).LeftChild
-				: ((SumNode)node).RightChild,
-			compressed.Substring(1)
-		);
-	}
-	else if (node is RootNode)
-	{
-		return Search(
-			compressed[0] == '0'
-				? ((RootNode)node).LeftChild
-				: ((RootNode)node).RightChild,
-			compressed.Substring(1)
-		);
-	}
-	throw new Exception("Unhandled node type in Search");
 }
 
 RootNode BuildTree(List<KeyValuePair<int, INode>> nodeList)
